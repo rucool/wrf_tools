@@ -1,0 +1,11 @@
+name: wrf
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - dask
+  - netcdf4
+  - wrf-python
+  - xarray
+  - pip:
+    - msgpack
