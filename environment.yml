@@ -3,9 +3,9 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - dask
-  - netcdf4
-  - wrf-python
-  - xarray
-  - pip:
-    - msgpack
+  - dask=1.0.0
+  - netcdf4=1.4.2
+  - numpy=1.15.4
+  - pandas=0.23.4
+  - wrf-python=1.2.0
+  - xarray=0.11.0

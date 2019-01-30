@@ -1,8 +1,24 @@
-from wrf import getvar, interplevel
-import xarray as xr
+#!/usr/bin/env python
+import argparse
 import numpy as np
+import os
 import pandas as pd
+import sys
+import xarray as xr
 from collections import OrderedDict
+from wrf import getvar, interplevel
+
+
+def create_dir(new_dir):
+    # Check if dir exists.. if it doesn't... create it.
+    if not os.path.isdir(new_dir):
+        try:
+            os.makedirs(new_dir)
+        except OSError:
+            if os.path.exists(new_dir):
+                pass
+            else:
+                raise
 
 
 def delete_attr(da):
@@ -35,7 +51,20 @@ def split_uvm(da, height=None):
     return da[0].rename('u'), da[1].rename('v')
 
 
-def main(fname, save_file, variables, heights, time_units):
+def main(args):
+    fname = args.file
+    save_file = args.save_file
+
+    # List of variables that are already included in the WRF output and that we want to compute using the wrf-python toolbox
+    variables = dict(primary=['XLAT', 'XLONG', 'T2', 'SWDOWN', 'LWUPB', 'GLW', 'PSFC', 'RAINC', 'RAINNC', 'RAINSH'], computed=['rh2', 'slp'])
+
+    # Generate height table for interpolation of U and V components
+    heights = [30, 250, 10]  # minimum height, maximum height, distance between heights
+
+    # Output time units
+    time_units = 'seconds since 1970-01-01 00:00:00'
+
+    create_dir(os.path.dirname(save_file))
 
     # Create list of heights between min and max height separated by a stride value defined above
     heights = list(np.arange(heights[0], heights[1], heights[2]))
@@ -260,13 +289,19 @@ def main(fname, save_file, variables, heights, time_units):
 
 
 if __name__ == '__main__':
-    wrf_file = 'data/nc_raw/wrfout_d01_2018-11-19_000000.nc'  # raw wrf ncfile
-    save_name = '/Users/mikesmith/Documents/projects/wrf/new_wrf-processed.nc'  # filename for saving
+    arg_parser = argparse.ArgumentParser(description=main.__doc__, formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-    # List of variables that already included in the WRF output and that we want to compute using the wrf-python toolbox
-    variables = dict(primary=['XLAT', 'XLONG', 'T2', 'SWDOWN', 'LWUPB', 'GLW', 'PSFC', 'RAINC', 'RAINNC', 'RAINSH'], computed=['rh2', 'slp'])
+    arg_parser.add_argument('-f', '--file',
+                            dest='file',
+                            default='data/nc_raw/wrfout_d01_2018-11-19_000000.nc',
+                            type=str,
+                            help='Full file path to Raw WRF netCDF file ')
 
-    # Generate height table for interpolation of U and V components
-    uv_heights = [30, 250, 10]  # minimum height, maximum height, distance between heights
+    arg_parser.add_argument('-s', '--save_file',
+                            dest='save_file',
+                            default='data/nc_subset/new_wrf-processed.nc',
+                            type=str,
+                            help='Full file path to save directory and save filename')
 
-    main(wrf_file, save_name, variables, uv_heights, 'seconds since 1970-01-01 00:00:00')
+    parsed_args = arg_parser.parse_args()
+    sys.exit(main(parsed_args))
