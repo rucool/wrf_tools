@@ -59,7 +59,7 @@ def main(args):
     variables = dict(primary=['XLAT', 'XLONG', 'T2', 'SWDOWN', 'LWUPB', 'GLW', 'PSFC', 'RAINC', 'RAINNC', 'RAINSH'], computed=['rh2', 'slp'])
 
     # Generate height table for interpolation of U and V components
-    heights = [30, 250, 10]  # minimum height, maximum height, distance between heights
+    gen_heights = [30, 250, 10]  # minimum height, maximum height, distance between heights
 
     # Output time units
     time_units = 'seconds since 1970-01-01 00:00:00'
@@ -67,8 +67,8 @@ def main(args):
     create_dir(os.path.dirname(save_file))
 
     # Create list of heights between min and max height separated by a stride value defined above
-    heights = list(np.arange(heights[0], heights[1], heights[2]))
-    heights.append(heights[1])
+    heights = list(np.arange(gen_heights[0], gen_heights[1], gen_heights[2]))
+    heights.append(gen_heights[1])
 
     # Open using netCDF toolbox
     # ncfile = Dataset(wrf_file) # open using ncar netCDF toolbox
