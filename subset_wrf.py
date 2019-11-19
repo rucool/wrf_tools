@@ -6,19 +6,7 @@ import pandas as pd
 import sys
 import xarray as xr
 from collections import OrderedDict
-from wrf import getvar, interplevel
-
-
-def create_dir(new_dir):
-    # Check if dir exists.. if it doesn't... create it.
-    if not os.path.isdir(new_dir):
-        try:
-            os.makedirs(new_dir)
-        except OSError:
-            if os.path.exists(new_dir):
-                pass
-            else:
-                raise
+from wrf import getvar, interplevel, default_fill
 
 
 def delete_attr(da):
@@ -55,8 +43,11 @@ def main(args):
     fname = args.file
     save_file = args.save_file
 
-    # List of variables that are already included in the WRF output and that we want to compute using the wrf-python toolbox
-    variables = dict(primary=['XLAT', 'XLONG', 'T2', 'SWDOWN', 'LWUPB', 'GLW', 'PSFC', 'RAINC', 'RAINNC', 'RAINSH'], computed=['rh2', 'slp'])
+    # List of variables that are already included in the WRF output and that we want to compute using the wrf-python
+    variables = dict(
+        primary=['XLAT', 'XLONG', 'T2', 'SWDOWN', 'LWUPB', 'GLW', 'PSFC', 'RAINC', 'RAINNC', 'RAINSH'],
+        computed=['rh2', 'slp']
+    )
 
     # Generate height table for interpolation of U and V components
     gen_heights = [30, 250, 10]  # minimum height, maximum height, distance between heights
@@ -64,14 +55,14 @@ def main(args):
     # Output time units
     time_units = 'seconds since 1970-01-01 00:00:00'
 
-    create_dir(os.path.dirname(save_file))
+    os.makedirs(os.path.dirname(save_file), exist_ok=True)
+    # create_dir(os.path.dirname(save_file))
 
     # Create list of heights between min and max height separated by a stride value defined above
     heights = list(np.arange(gen_heights[0], gen_heights[1], gen_heights[2]))
     heights.append(gen_heights[1])
 
     # Open using netCDF toolbox
-    # ncfile = Dataset(wrf_file) # open using ncar netCDF toolbox
     ncfile = xr.open_dataset(fname)
     original_global_attributes = ncfile.attrs
     ncfile = ncfile._file_obj.ds
@@ -92,27 +83,29 @@ def main(args):
     # Calculate u and v components of wind rotated to Earth coordinates
     uvm = getvar(ncfile, 'uvmet')
 
-    # Initialize lists for u and v arrays. We will append each interpolated height to this lest and then concatenate this list with xarray
-    u_arrays = []
-    v_arrays = []
-
     # interpolate u and v components of wind to 0-200m by 10m
-    for x in heights:
-        uvtemp = interplevel(uvm, new_z, x)
-        utemp, vtemp = split_uvm(uvtemp, x)
-        u_arrays.append(utemp)
-        v_arrays.append(vtemp)
+    uvtemp = interplevel(uvm, new_z, heights, default_fill(np.float32))
+    uvtemp = uvtemp.rename({'level': 'height'})
+    utemp, vtemp = split_uvm(uvtemp)
 
     # Calculate 10m u and v components of wind rotated to Earth coordinates and split into separate variables
     primary_vars['U10'], primary_vars['V10'] = split_uvm(getvar(ncfile, 'uvmet10'))
 
     # Concatenate the list of calculated u and v values into data array. Append to diagnostic_vars list
-    diagnostic_vars['U'] = xr.concat(u_arrays, dim='height')
-    diagnostic_vars['V'] = xr.concat(v_arrays, dim='height')
+    diagnostic_vars['U'] = xr.concat(utemp, dim='height')
+    diagnostic_vars['V'] = xr.concat(vtemp, dim='height')
 
     # Create xarray dataset of primary and diagnostic variables
     ds = xr.Dataset({**primary_vars, **diagnostic_vars})
-    # ds['Time'] = ds['Time'][0]
+    # ds['U'] = ds.U.astype(np.float32)
+    # ds['V'] = ds.V.astype(np.float32)
+
+    try:
+        del ds.U.attrs['vert_units']
+        del ds.V.attrs['vert_units']
+    except KeyError:
+        pass
+
     ds['Times'] = np.array([pd.Timestamp(ds.Time.data).strftime('%Y-%m-%d_%H:%M:%S')]).astype('<S19')
     ds = ds.expand_dims('Time', axis=0)
 
@@ -160,8 +153,6 @@ def main(args):
     ds['U'].attrs['short_name'] = 'u'
     ds['U'].attrs['valid_min'] = np.float32(-300)
     ds['U'].attrs['valid_max'] = np.float32(300)
-    # ds['u'].attrs['coordinates'] = 'lon lat'
-    # ds['u'].attrs['grid_mapping'] = 'crs'
 
     # Set v attributes
     ds['V'].attrs['long_name'] = 'Northward Wind Component'
@@ -176,8 +167,6 @@ def main(args):
     ds['U10'].attrs['short_name'] = 'u'
     ds['U10'].attrs['valid_min'] = np.float32(-300)
     ds['U10'].attrs['valid_max'] = np.float32(300)
-    # ds['u'].attrs['coordinates'] = 'lon lat'
-    # ds['u'].attrs['grid_mapping'] = 'crs'
 
     # Set v10 attributes
     ds['V10'].attrs['long_name'] = 'Northward Wind Component - 10m'
@@ -185,8 +174,6 @@ def main(args):
     ds['V10'].attrs['short_name'] = 'v'
     ds['V10'].attrs['valid_min'] = np.float32(-300)
     ds['V10'].attrs['valid_max'] = np.float32(300)
-    # ds['v'].attrs['coordinates'] = 'lon lat'
-    # ds['v'].attrs['grid_mapping'] = 'crs'
 
     # set primary attributes
     ds['GLW'].attrs['standard_name'] = 'surface_downwelling_longwave_flux_in_air'
@@ -262,24 +249,13 @@ def main(args):
     global_attributes.update(original_global_attributes)
     ds = ds.assign_attrs(global_attributes)
 
-    # # Set crs attributes
-    # ds['u'].attrs['grid_mapping'] = 'crs'
-    # ds['v'].attrs['grid_mapping'] = 'crs'
-    # kwargs = dict(crs=None)
-    # ds = ds.assign(**kwargs)
-    # ds['crs'].attrs['grid_mapping_name'] = 'latitude_longitude'
-    # ds['crs'].attrs['inverse_flattening'] = 298.257223563
-    # ds['crs'].attrs['long_name'] = 'Coordinate Reference System'
-    # ds['crs'].attrs['semi_major_axis'] = '6378137.0'
-    # ds['crs'].attrs['epsg_code'] = 'EPSG:4326'
-    # ds['crs'].attrs['comment'] = 'http://www.opengis.net/def/crs/EPSG/0/4326'
-
-    encoding = {}
     # Add compression to all variables
+    encoding = {}
     for k in ds.data_vars:
-        encoding[k] = {'zlib': True, 'complevel': 4}
+        encoding[k] = {'zlib': True, 'complevel': 1}
 
-    # add the encoding for time so xarray exports the proper time. Also remove compression from dimensions. They should never have fill values
+    # add the encoding for time so xarray exports the proper time.
+    # Also remove compression from dimensions. They should never have fill values
     encoding['Time'] = dict(units=time_units, calendar='gregorian', zlib=False, _FillValue=False, dtype=np.double)
     encoding['XLONG'] = dict(zlib=False, _FillValue=False)
     encoding['XLAT'] = dict(zlib=False, _FillValue=False)
