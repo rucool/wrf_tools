@@ -97,8 +97,8 @@ def main(args):
 
     # Create xarray dataset of primary and diagnostic variables
     ds = xr.Dataset({**primary_vars, **diagnostic_vars})
-    # ds['U'] = ds.U.astype(np.float32)
-    # ds['V'] = ds.V.astype(np.float32)
+    ds['U'] = ds.U.astype(np.float32)
+    ds['V'] = ds.V.astype(np.float32)
 
     try:
         del ds.U.attrs['vert_units']
@@ -259,7 +259,7 @@ def main(args):
     encoding['Time'] = dict(units=time_units, calendar='gregorian', zlib=False, _FillValue=False, dtype=np.double)
     encoding['XLONG'] = dict(zlib=False, _FillValue=False)
     encoding['XLAT'] = dict(zlib=False, _FillValue=False)
-    encoding['height'] = dict(zlib=False, _FillValue=False)
+    encoding['height'] = dict(zlib=False, _FillValue=False, dtype=np.int32)
 
     ds.to_netcdf(save_file, encoding=encoding, format='netCDF4', engine='netcdf4', unlimited_dims='Time')
 
