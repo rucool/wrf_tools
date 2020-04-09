@@ -99,6 +99,7 @@ def main(args):
     ds = xr.Dataset({**primary_vars, **diagnostic_vars})
     ds['U'] = ds.U.astype(np.float32)
     ds['V'] = ds.V.astype(np.float32)
+    ds['height'] = ds.height.astype(np.int32)
 
     try:
         del ds.U.attrs['vert_units']
@@ -151,6 +152,8 @@ def main(args):
     ds['U'].attrs['long_name'] = 'Eastward Wind Component'
     ds['U'].attrs['standard_name'] = 'eastward_wind'
     ds['U'].attrs['short_name'] = 'u'
+    ds['U'].attrs['units'] = 'm s-1'
+    ds['U'].attrs['description'] = 'earth rotated u'
     ds['U'].attrs['valid_min'] = np.float32(-300)
     ds['U'].attrs['valid_max'] = np.float32(300)
 
@@ -158,6 +161,8 @@ def main(args):
     ds['V'].attrs['long_name'] = 'Northward Wind Component'
     ds['V'].attrs['standard_name'] = 'northward_wind'
     ds['V'].attrs['short_name'] = 'v'
+    ds['V'].attrs['units'] = 'm s-1'
+    ds['V'].attrs['description'] = 'earth rotated v'
     ds['V'].attrs['valid_min'] = np.float32(-300)
     ds['V'].attrs['valid_max'] = np.float32(300)
 
@@ -165,6 +170,8 @@ def main(args):
     ds['U10'].attrs['long_name'] = 'Eastward Wind Component - 10m'
     ds['U10'].attrs['standard_name'] = 'eastward_wind'
     ds['U10'].attrs['short_name'] = 'u'
+    ds['U10'].attrs['units'] = 'm s-1'
+    ds['U10'].attrs['description'] = '10m earth rotated u'
     ds['U10'].attrs['valid_min'] = np.float32(-300)
     ds['U10'].attrs['valid_max'] = np.float32(300)
 
@@ -172,6 +179,8 @@ def main(args):
     ds['V10'].attrs['long_name'] = 'Northward Wind Component - 10m'
     ds['V10'].attrs['standard_name'] = 'northward_wind'
     ds['V10'].attrs['short_name'] = 'v'
+    ds['V10'].attrs['units'] = 'm s-1'
+    ds['V10'].attrs['description'] = '10m earth rotated v'
     ds['V10'].attrs['valid_min'] = np.float32(-300)
     ds['V10'].attrs['valid_max'] = np.float32(300)
 
