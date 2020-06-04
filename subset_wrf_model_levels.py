@@ -3,7 +3,7 @@
 """
 Author: Mike Smith
 Modified on Apr 10, 2020 by Lori Garzio
-Last modified May 4, 2020
+Last modified June 4, 2020
 """
 
 import argparse
@@ -71,6 +71,26 @@ def main(args):
 
     ds['Times'] = np.array([pd.Timestamp(ds.Time.data).strftime('%Y-%m-%d_%H:%M:%S')]).astype('<S19')
     ds = ds.expand_dims('Time', axis=0)
+
+    # format bottom_top and low_mid_high dimensions
+    ds['bottom_top'] = np.int32(ds.bottom_top)
+    ds['low_mid_high'] = np.array([300, 2000, 6000], dtype='int32')
+
+    # add attributes for model levels
+    ds['bottom_top'].attrs['long_name'] = 'Model Level'
+    ds['bottom_top'].attrs['comment'] = 'Integer coordinate for native WRF model level'
+    ds['bottom_top'].attrs['axis'] = 'Z'
+    ds['bottom_top'].attrs['positive'] = 'up'
+    ds['bottom_top'].attrs['_CoordinateAxisType'] = 'GeoZ'  # need this attribute for THREDDs aggregation
+    ds['bottom_top'].attrs['_CoordinateZisPositive'] = 'up'  # need this attribute for THREDDs aggregation
+
+    ds['low_mid_high'].attrs['units'] = 'm'
+    ds['low_mid_high'].attrs['long_name'] = 'Cloud Level'
+    ds['low_mid_high'].attrs['comment'] = 'Cloud level, low 300 m, mid 2000 m, high 6000 m'
+    ds['low_mid_high'].attrs['axis'] = 'Z'
+    ds['low_mid_high'].attrs['positive'] = 'up'
+    ds['low_mid_high'].attrs['_CoordinateAxisType'] = 'Height'  # need this attribute for THREDDs aggregation
+    ds['low_mid_high'].attrs['_CoordinateZisPositive'] = 'up'  # need this attribute for THREDDs aggregation
 
     # Add description and units for lon, lat dimensions for georeferencing
     ds['XLAT'].attrs['description'] = 'latitude'
