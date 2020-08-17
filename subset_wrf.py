@@ -1,4 +1,11 @@
 #!/usr/bin/env python
+
+"""
+Author: Mike Smith
+Modified on Aug 17, 2020 by Lori Garzio
+Last modified Aug 17, 2020
+"""
+
 import argparse
 import numpy as np
 import os
@@ -45,7 +52,8 @@ def main(args):
 
     # List of variables that are already included in the WRF output and that we want to compute using the wrf-python
     variables = dict(
-        primary=['XLAT', 'XLONG', 'T2', 'SWDOWN', 'LWUPB', 'GLW', 'PSFC', 'RAINC', 'RAINNC', 'RAINSH'],
+        primary=['XLAT', 'XLONG', 'T2', 'SWDOWN', 'LWUPB', 'GLW', 'PSFC', 'RAINC', 'RAINNC', 'RAINSH', 'SNOWNC',
+                 'REFD_MAX', 'SST', 'DIFFUSE_FRAC', 'LANDMASK', 'LAKEMASK'],
         computed=['rh2', 'slp']
     )
 
@@ -209,6 +217,21 @@ def main(args):
     ds['RAINC'].attrs['long_name'] = 'Accumulated Total Cumulus Precipitation'
     ds['RAINNC'].attrs['long_name'] = 'Accumulated Total Grid Scale Precipitation'
     ds['RAINSH'].attrs['long_name'] = 'Accumulated Shallow Cumulus Precipitation'
+
+    ds['SNOWNC'].attrs['standard_name'] = 'surface_snow_thickness'
+    ds['SNOWNC'].attrs['long_name'] = 'Accumulated Total Grid Scale Snow and Ice'
+
+    ds['REFD_MAX'].attrs['long_name'] = 'Maximum Derived Radar Reflectivity'    # !!! units not CF compliant
+
+    ds['SST'].attrs['standard_name'] = 'sea_surface_temperature'
+    ds['SST'].attrs['long_name'] = 'Sea Surface Temperature'
+
+    ds['DIFFUSE_FRAC'].attrs['long_name'] = 'Diffuse Fraction of Surface Shortwave Irradiance'
+
+    ds['LANDMASK'].attrs['standard_name'] = 'land_binary_mask'
+    ds['LANDMASK'].attrs['long_name'] = 'Land Mask'
+
+    ds['LAKEMASK'].attrs['long_name'] = 'Lake Mask'
     ds['XTIME'].attrs['long_name'] = 'minutes since simulation start'
 
     datetime_format = '%Y%m%dT%H%M%SZ'
