@@ -53,7 +53,7 @@ def main(args):
     # List of variables that are already included in the WRF output and that we want to compute using the wrf-python
     variables = dict(
         primary=['XLAT', 'XLONG', 'T2', 'SWDOWN', 'LWUPB', 'GLW', 'PSFC', 'RAINC', 'RAINNC', 'RAINSH', 'SNOWNC',
-                 'REFD_MAX', 'SST', 'DIFFUSE_FRAC', 'LANDMASK', 'LAKEMASK'],
+                 'SST', 'DIFFUSE_FRAC', 'LANDMASK', 'LAKEMASK'],
         computed=['rh2', 'slp']
     )
 
@@ -220,8 +220,6 @@ def main(args):
 
     ds['SNOWNC'].attrs['standard_name'] = 'surface_snow_thickness'
     ds['SNOWNC'].attrs['long_name'] = 'Accumulated Total Grid Scale Snow and Ice'
-
-    ds['REFD_MAX'].attrs['long_name'] = 'Maximum Derived Radar Reflectivity'    # !!! units not CF compliant
 
     ds['SST'].attrs['standard_name'] = 'sea_surface_temperature'
     ds['SST'].attrs['long_name'] = 'Sea Surface Temperature'
