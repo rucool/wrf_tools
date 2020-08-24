@@ -35,7 +35,7 @@ def main(args):
     fname = args.file
     save_file = args.save_file
 
-    # List of variables that are already included in the WRF output and that we want to compute using the wrf-python
+    # List of variables to subset
     variables = ['XLAT', 'XLONG', 'temp', 'rh', 'z', 'pressure', 'ter', 'slp', 'cloudfrac', 'td', 'height_agl']
 
     # Output time units
@@ -77,6 +77,7 @@ def main(args):
     ds['low_mid_high'] = np.array([300, 2000, 6000], dtype='int32')
 
     # add attributes for model levels
+    ds['bottom_top'].attrs['units'] = '1'
     ds['bottom_top'].attrs['long_name'] = 'Model Level'
     ds['bottom_top'].attrs['comment'] = 'Integer coordinate for native WRF model level'
     ds['bottom_top'].attrs['axis'] = 'Z'
