@@ -3,7 +3,7 @@
 """
 Author: Mike Smith
 Modified on Apr 10, 2020 by Lori Garzio
-Last modified June 4, 2020
+Last modified Aug 24, 2020
 """
 
 import argparse
