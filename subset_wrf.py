@@ -3,7 +3,7 @@
 """
 Author: Mike Smith
 Modified on Aug 17, 2020 by Lori Garzio
-Last modified Aug 24, 2020
+Last modified Aug 31, 2020
 """
 
 import argparse
@@ -53,7 +53,7 @@ def main(args):
     # List of variables that are already included in the WRF output and that we want to compute using the wrf-python
     variables = dict(
         primary=['XLAT', 'XLONG', 'T2', 'SWDOWN', 'LWUPB', 'GLW', 'PSFC', 'RAINC', 'RAINNC', 'RAINSH', 'SNOWNC',
-                 'SST', 'DIFFUSE_FRAC', 'LANDMASK', 'LAKEMASK'],
+                 'SST', 'DIFFUSE_FRAC', 'LANDMASK', 'LAKEMASK', 'PBLH'],
         computed=['rh2', 'slp', 'mdbz']
     )
 
@@ -233,6 +233,9 @@ def main(args):
     ds['LANDMASK'].attrs['long_name'] = 'Land Mask'
 
     ds['LAKEMASK'].attrs['long_name'] = 'Lake Mask'
+
+    ds['PBLH'].attrs['long_name'] = 'Height of the Top of the Planetary Boundary Layer (PBL)'
+
     ds['XTIME'].attrs['long_name'] = 'minutes since simulation start'
 
     datetime_format = '%Y%m%dT%H%M%SZ'
