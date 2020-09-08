@@ -3,7 +3,7 @@
 """
 Author: Mike Smith
 Modified on Aug 17, 2020 by Lori Garzio
-Last modified Aug 31, 2020
+Last modified Sep 8, 2020
 """
 
 import argparse
@@ -197,7 +197,7 @@ def main(args):
     ds['GLW'].attrs['long_name'] = 'Surface Downwelling Longwave Flux'
 
     ds['LWUPB'].attrs['standard_name'] = 'surface_upwelling_longwave_flux'
-    ds['LWUPB'].attrs['long_name'] = 'Surface Upwelling LongwaveFlux'
+    ds['LWUPB'].attrs['long_name'] = 'Surface Upwelling Longwave Flux'
 
     ds['PSFC'].attrs['standard_name'] = 'surface_air_pressure'
     ds['PSFC'].attrs['long_name'] = 'Air Pressure at Surface'

@@ -3,7 +3,7 @@
 """
 Author: Mike Smith
 Modified on Apr 10, 2020 by Lori Garzio
-Last modified Aug 24, 2020
+Last modified Sep 8, 2020
 """
 
 import argparse
@@ -86,8 +86,8 @@ def main(args):
     ds['bottom_top'].attrs['_CoordinateZisPositive'] = 'up'  # need this attribute for THREDDs aggregation
 
     ds['low_mid_high'].attrs['units'] = 'm'
-    ds['low_mid_high'].attrs['long_name'] = 'Cloud Level'
-    ds['low_mid_high'].attrs['comment'] = 'Cloud level, low 300 m, mid 2000 m, high 6000 m'
+    ds['low_mid_high'].attrs['long_name'] = 'Cloud Layer'
+    ds['low_mid_high'].attrs['comment'] = 'Cloud layer, low 300 m, mid 2000 m, high 6000 m'
     ds['low_mid_high'].attrs['axis'] = 'Z'
     ds['low_mid_high'].attrs['positive'] = 'up'
     ds['low_mid_high'].attrs['_CoordinateAxisType'] = 'Height'  # need this attribute for THREDDs aggregation
@@ -158,7 +158,7 @@ def main(args):
     ds['slp'].attrs['long_name'] = 'Air Pressure at Sea Level'
     ds['slp'].attrs['standard_name'] = 'air_pressure_at_mean_sea_level'
 
-    ds['cloudfrac'].attrs['long_name'] = 'Cloud Area Fraction in Model Level'
+    ds['cloudfrac'].attrs['long_name'] = 'Layer Cloud Area Fraction'
     ds['cloudfrac'].attrs['standard_name'] = 'cloud_area_fraction_in_atmosphere_layer'
 
     ds['td'].attrs['long_name'] = 'Dew Point Temperature'
