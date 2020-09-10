@@ -3,7 +3,7 @@
 """
 Author: Mike Smith
 Modified on Aug 17, 2020 by Lori Garzio
-Last modified Sep 8, 2020
+Last modified Sep 10, 2020
 """
 
 import argparse
@@ -103,6 +103,23 @@ def main(args):
     diagnostic_vars['U'] = xr.concat(utemp, dim='height')
     diagnostic_vars['V'] = xr.concat(vtemp, dim='height')
 
+    # Interpolate u and v components of wind to Boundary Layer Heights for wind gust calculation
+    uvpblh = interplevel(uvm, new_z, primary_vars['PBLH'])
+    uvpblh = delete_attr(uvpblh).drop(['u_v'])  # drop unnecessary attributes
+    upblh = uvpblh[0].rename('upblh')
+    vpblh = uvpblh[1].rename('vpblh')
+
+    # Calculate wind gust
+    sfcwind = np.sqrt(primary_vars['U10'] ** 2 + primary_vars['V10'] ** 2)
+    pblwind = np.sqrt(upblh ** 2 + vpblh ** 2)
+    delwind = pblwind - sfcwind
+    pblval = primary_vars['PBLH'] / 2000
+    pblval = pblval.where(pblval < 0.5, other=0.5)  # if the value is less than 0.5, keep it. otherwise, change to 0.5
+    delwind = delwind * (1 - pblval)
+    gust = sfcwind + delwind
+    gust = gust.drop('level')  # drop the 'level' coordinate
+    gust = gust.astype(np.float32)
+
     # Create xarray dataset of primary and diagnostic variables
     ds = xr.Dataset({**primary_vars, **diagnostic_vars})
     ds['U'] = ds.U.astype(np.float32)
@@ -123,9 +140,6 @@ def main(args):
     ds['XLAT'].attrs['units'] = 'degree_north'
     ds['XLONG'].attrs['description'] = 'longitude'
     ds['XLONG'].attrs['units'] = 'degree_east'
-
-    # Set time attribute
-    ds['Time'].attrs['standard_name'] = 'time'
 
     # Set XTIME attribute
     ds['XTIME'].attrs['units'] = 'minutes'
@@ -238,11 +252,16 @@ def main(args):
 
     ds['XTIME'].attrs['long_name'] = 'minutes since simulation start'
 
-    # calculate wind gust and add to the variable list - in progress (currently adding array of nans to file)
+    # add the calculated wind gust to the dataset
     windgust_attrs = dict(long_name='Near Surface Wind Gust',
                           description='Calculated wind gust, computed by mixing down momentum from the level at the '
                                       'top of the planetary boundary layer',
                           units='m s-1')
+    ds['WINDGUST'] = xr.Variable(gust.dims, gust.values, attrs=windgust_attrs)
+    ds['WINDGUST'] = ds['WINDGUST'].expand_dims('Time', axis=0)
+
+    # Set time attribute
+    ds['Time'].attrs['standard_name'] = 'time'
 
     datetime_format = '%Y%m%dT%H%M%SZ'
     created = pd.Timestamp(pd.datetime.utcnow()).strftime(datetime_format)  # creation time Timestamp
