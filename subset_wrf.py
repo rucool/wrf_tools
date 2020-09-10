@@ -243,8 +243,6 @@ def main(args):
                           description='Calculated wind gust, computed by mixing down momentum from the level at the '
                                       'top of the planetary boundary layer',
                           units='m s-1')
-    ds['WINDGUST'] = xr.Variable(ds['T2'].dims, np.empty(np.shape(ds['T2']), dtype=np.float32), attrs=windgust_attrs)
-    ds['WINDGUST'][:] = np.nan
 
     datetime_format = '%Y%m%dT%H%M%SZ'
     created = pd.Timestamp(pd.datetime.utcnow()).strftime(datetime_format)  # creation time Timestamp
