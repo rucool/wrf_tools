@@ -246,7 +246,7 @@ def main(args):
         ('keywords', 'Weather Advisories > Marine Weather/Forecast'),
         ('Conventions', 'CF-1.7'),
         ('naming_authority', 'edu.rutgers.marine.rucool'),
-        ('history', 'Hourly WRF data combined into one hourly file.'),
+        ('history', 'Hourly WRF raw output processed into new hourly file with selected variables.'),
         ('processing_level', 'Level 2'),
         ('comment', 'WRF Model operated by RUCOOL'),
         ('acknowledgement', 'This data is provided by the Rutgers Center for Ocean Observing Leadership. Funding is provided by the New Jersey Board of Public Utilities).'),
