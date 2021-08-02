@@ -2,8 +2,8 @@
 
 """
 Author: Mike Smith
-Modified on Apr 10, 2020 by Lori Garzio
-Last modified Sep 8, 2020
+Modified on 4/10/2020 by Lori Garzio
+Last modified 8/1/2021
 """
 
 import argparse
@@ -14,21 +14,7 @@ import sys
 import xarray as xr
 from collections import OrderedDict
 from wrf import getvar
-
-
-def delete_attr(da):
-    """
-    Delete these local attributes because they are not necessary
-    :param da: DataArray of variable
-    :return: DataArray of variable with local attributes removed
-    """
-
-    for item in ['FieldType', 'MemoryOrder', 'stagger', 'coordinates', 'projection', 'missing_value']:
-        try:
-            del da.attrs[item]
-        except KeyError:
-            continue
-    return da
+import functions.common as cf
 
 
 def main(args):
@@ -55,14 +41,14 @@ def main(args):
             varname = 'height_msl'
         else:
             varname = var
-        vars[varname] = delete_attr(getvar(ncfile, var))
+        vars[varname] = cf.delete_attr(getvar(ncfile, var))
 
     # Get u and v components of wind rotated to Earth coordinates
     uvm = getvar(ncfile, 'uvmet')
 
     for uv in ['u', 'v']:
         da = uvm.sel(u_v=uv)
-        da = delete_attr(da).drop(['u_v'])  # delete extra attributes and drop the extra coordinate
+        da = cf.delete_attr(da).drop(['u_v'])  # delete extra attributes and drop the extra coordinate
         da = da.rename(uv)
         vars[uv] = da  # add to variable dictionary
 

@@ -2,8 +2,8 @@
 
 """
 Author: Mike Smith
-Modified on Aug 17, 2020 by Lori Garzio
-Last modified Sep 10, 2020
+Modified on 8/17/2020 by Lori Garzio
+Last modified 8/1/2021
 """
 
 import argparse
@@ -14,36 +14,7 @@ import sys
 import xarray as xr
 from collections import OrderedDict
 from wrf import getvar, interplevel, default_fill
-
-
-def delete_attr(da):
-    """
-    Delete these local attributes because they are not necessary
-    :param da: DataArray of variable
-    :return: DataArray of variable with local attributes removed
-    """
-
-    for item in ['projection', 'coordinates', 'MemoryOrder', 'FieldType', 'stagger', 'missing_value']:
-        try:
-            del da.attrs[item]
-        except KeyError:
-            continue
-    return da
-
-
-def split_uvm(da, height=None):
-    """
-    Splits the uvmet variable while dropping extraneous dimensions and renaming variables properly
-    :param da: uvmet variable
-    :param height: height only
-    :return: u, v data arrays
-    """
-    da = delete_attr(da).drop(['u_v'])
-
-    if height:
-        da['height'] = np.int32(height)  # add height variable for sea level: 0m
-        da = da.expand_dims('height', axis=1)  # add height dimension to file
-    return da[0].rename('u'), da[1].rename('v')
+import functions.common as cf
 
 
 def main(args):
@@ -53,7 +24,7 @@ def main(args):
     # List of variables that are already included in the WRF output and that we want to compute using the wrf-python
     variables = dict(
         primary=['XLAT', 'XLONG', 'T2', 'SWDOWN', 'LWUPB', 'GLW', 'PSFC', 'RAINC', 'RAINNC', 'RAINSH', 'SNOWNC',
-                 'SST', 'DIFFUSE_FRAC', 'LANDMASK', 'LAKEMASK', 'PBLH'],
+                 'SST', 'DIFFUSE_FRAC', 'LANDMASK', 'LAKEMASK', 'PBLH', 'TSK'],
         computed=['rh2', 'slp', 'mdbz']
     )
 
@@ -78,12 +49,12 @@ def main(args):
     # Load primary variables and append to list
     primary_vars = {}
     for var in variables['primary']:
-        primary_vars[var] = delete_attr(getvar(ncfile, var))
+        primary_vars[var] = cf.delete_attr(getvar(ncfile, var))
 
     # Calculate diagnostic variables defined above and add to dictionary
     diagnostic_vars = {}
     for dvar in variables['computed']:
-        diagnostic_vars[dvar.upper()] = delete_attr(getvar(ncfile, dvar))
+        diagnostic_vars[dvar.upper()] = cf.delete_attr(getvar(ncfile, dvar))
 
     # Subtract terrain height from height above sea level
     new_z = getvar(ncfile, 'z') - getvar(ncfile, 'ter')
@@ -94,10 +65,10 @@ def main(args):
     # interpolate u and v components of wind to 0-200m by 10m
     uvtemp = interplevel(uvm, new_z, heights, default_fill(np.float32))
     uvtemp = uvtemp.rename({'level': 'height'})
-    utemp, vtemp = split_uvm(uvtemp)
+    utemp, vtemp = cf.split_uvm(uvtemp)
 
     # Calculate 10m u and v components of wind rotated to Earth coordinates and split into separate variables
-    primary_vars['U10'], primary_vars['V10'] = split_uvm(getvar(ncfile, 'uvmet10'))
+    primary_vars['U10'], primary_vars['V10'] = cf.split_uvm(getvar(ncfile, 'uvmet10'))
 
     # Concatenate the list of calculated u and v values into data array. Append to diagnostic_vars list
     diagnostic_vars['U'] = xr.concat(utemp, dim='height')
@@ -105,7 +76,7 @@ def main(args):
 
     # Interpolate u and v components of wind to Boundary Layer Heights for wind gust calculation
     uvpblh = interplevel(uvm, new_z, primary_vars['PBLH'])
-    uvpblh = delete_attr(uvpblh).drop(['u_v'])  # drop unnecessary attributes
+    uvpblh = cf.delete_attr(uvpblh).drop(['u_v'])  # drop unnecessary attributes
     upblh = uvpblh[0].rename('upblh')
     vpblh = uvpblh[1].rename('vpblh')
 
@@ -242,6 +213,8 @@ def main(args):
     ds['DIFFUSE_FRAC'].attrs['long_name'] = 'Diffuse Fraction of Surface Shortwave Irradiance'
 
     ds['MDBZ'].attrs['long_name'] = 'Maximum Radar Reflectivity'
+
+    ds['TSK'].attrs['long_name'] = 'Surface Skin Temperature'
 
     ds['LANDMASK'].attrs['standard_name'] = 'land_binary_mask'
     ds['LANDMASK'].attrs['long_name'] = 'Land Mask'
