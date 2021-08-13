@@ -3,7 +3,7 @@
 """
 Author: Mike Smith
 Modified on 7/30/2021 by Lori Garzio
-Last modified 7/30/2021
+Last modified 8/12/2021
 """
 
 import argparse
@@ -13,7 +13,7 @@ import pandas as pd
 import sys
 import xarray as xr
 from collections import OrderedDict
-from wrf import getvar, interplevel, default_fill
+from wrf import getvar, interplevel, default_fill, g_geoht
 import functions.common as cf
 
 
@@ -61,14 +61,20 @@ def main(args):
     # Get pressure - units are Pa so convert to mb
     p = getvar(ncfile, 'p') * .01
 
-    # interpolate u and v components of wind to defined heights in pressure (mb)
+    # interpolate u and v components of wind to defined pressure heights (mb)
     uvtemp = interplevel(uvm, p, heights_mb, default_fill(np.float32))
     uvtemp = uvtemp.rename({'level': 'pressure'})
     utemp, vtemp = cf.split_uvm(uvtemp)
 
-    # Concatenate the list of calculated u and v values into data array
+    # get geopotential height and interpolate to defined pressure heights (mb)
+    ght = g_geoht.get_height(ncfile, msl=True)
+    geoht = interplevel(ght, p, heights_mb, default_fill(np.float32))
+    geoht = geoht.rename({'level': 'pressure'})
+
+    # Concatenate the list of calculated u and v values and geopotential height into data array
     nc_vars['UP'] = xr.concat(utemp, dim='pressure')
     nc_vars['VP'] = xr.concat(vtemp, dim='pressure')
+    nc_vars['geoht'] = xr.concat(geoht, dim='pressure')
 
     # Calculate 10m u and v components of wind rotated to Earth coordinates and split into separate variables
     nc_vars['U10'], nc_vars['V10'] = cf.split_uvm(getvar(ncfile, 'uvmet10'))
@@ -79,6 +85,7 @@ def main(args):
     ds['VH'] = ds.VH.astype(np.float32)
     ds['UP'] = ds.UP.astype(np.float32)
     ds['VP'] = ds.VP.astype(np.float32)
+    ds['geoht'] = ds.geoht.astype(np.float32)
     ds['height'] = ds.height.astype(np.int32)
     ds['pressure'] = ds.pressure.astype(np.int32)
 
@@ -157,7 +164,7 @@ def main(args):
     ds['UP'].attrs['standard_name'] = 'eastward_wind'
     ds['UP'].attrs['short_name'] = 'u'
     ds['UP'].attrs['units'] = 'm s-1'
-    ds['UP'].attrs['description'] = 'earth rotated u, interpolated to Pressure in millibars'
+    ds['UP'].attrs['description'] = 'earth rotated u, interpolated to pressure in millibars'
     ds['UP'].attrs['valid_min'] = np.float32(-300)
     ds['UP'].attrs['valid_max'] = np.float32(300)
 
@@ -166,7 +173,7 @@ def main(args):
     ds['VP'].attrs['standard_name'] = 'northward_wind'
     ds['VP'].attrs['short_name'] = 'v'
     ds['VP'].attrs['units'] = 'm s-1'
-    ds['VP'].attrs['description'] = 'earth rotated v, interpolated to Pressure in millibars'
+    ds['VP'].attrs['description'] = 'earth rotated v, interpolated to pressure in millibars'
     ds['VP'].attrs['valid_min'] = np.float32(-300)
     ds['VP'].attrs['valid_max'] = np.float32(300)
 
@@ -187,6 +194,12 @@ def main(args):
     ds['V10'].attrs['description'] = '10m earth rotated v'
     ds['V10'].attrs['valid_min'] = np.float32(-300)
     ds['V10'].attrs['valid_max'] = np.float32(300)
+
+    # Set geopotential height attributes
+    ds['geoht'].attrs['long_name'] = 'Geopotential Height Above Mean Sea Level'
+    ds['geoht'].attrs['standard_name'] = 'geopotential_height'
+    ds['geoht'].attrs['units'] = 'm'
+    ds['geoht'].attrs['description'] = 'geopotential height above mean sea level, interpolated to pressure in millibars'
 
     ds['LANDMASK'].attrs['standard_name'] = 'land_binary_mask'
     ds['LANDMASK'].attrs['long_name'] = 'Land Mask'
