@@ -1,6 +1,6 @@
 # wrf_tools
 
-Tools for extracting primary and diagnostic variables from from the Weather Research and Forecasting Model (WRF).
+Tools for extracting primary and diagnostic variables from the Weather Research and Forecasting Model (WRF). Originally developed for Rutgers' RUWRF real-time model.
 
 Authors: Michael Smith (michaesm@marine.rutgers.edu) and Lori Garzio (lgarzio@marine.rutgers.edu)
 
