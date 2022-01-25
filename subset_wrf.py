@@ -29,7 +29,7 @@ def main(args):
     )
 
     # Generate height table for interpolation of U and V components
-    gen_heights = [20, 320, 10]  # minimum height, maximum height, distance between heights
+    gen_heights = [20, 320, 20]  # minimum height, maximum height, distance between heights
 
     # Output time units
     time_units = 'seconds since 1970-01-01 00:00:00'
