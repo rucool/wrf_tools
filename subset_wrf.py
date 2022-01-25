@@ -3,7 +3,7 @@
 """
 Author: Mike Smith
 Modified on 8/17/2020 by Lori Garzio
-Last modified 8/1/2021
+Last modified 1/25/2022
 """
 
 import argparse
@@ -24,12 +24,12 @@ def main(args):
     # List of variables that are already included in the WRF output and that we want to compute using the wrf-python
     variables = dict(
         primary=['XLAT', 'XLONG', 'T2', 'SWDOWN', 'LWUPB', 'GLW', 'PSFC', 'RAINC', 'RAINNC', 'RAINSH', 'SNOWNC',
-                 'SST', 'DIFFUSE_FRAC', 'LANDMASK', 'LAKEMASK', 'PBLH', 'TSK'],
+                 'SST', 'DIFFUSE_FRAC', 'LANDMASK', 'LAKEMASK', 'PBLH', 'TSK', 'UST'],
         computed=['rh2', 'slp', 'mdbz']
     )
 
     # Generate height table for interpolation of U and V components
-    gen_heights = [30, 250, 10]  # minimum height, maximum height, distance between heights
+    gen_heights = [20, 320, 10]  # minimum height, maximum height, distance between heights
 
     # Output time units
     time_units = 'seconds since 1970-01-01 00:00:00'
@@ -222,6 +222,8 @@ def main(args):
     ds['LAKEMASK'].attrs['long_name'] = 'Lake Mask'
 
     ds['PBLH'].attrs['long_name'] = 'Height of the Top of the Planetary Boundary Layer (PBL)'
+
+    ds['UST'].attrs['long_name'] = 'Friction Velocity'
 
     ds['XTIME'].attrs['long_name'] = 'minutes since simulation start'
 
