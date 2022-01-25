@@ -3,7 +3,7 @@
 """
 Author: Mike Smith
 Modified on 4/10/2020 by Lori Garzio
-Last modified 8/1/2021
+Last modified 1/25/2022
 """
 
 import argparse
@@ -22,7 +22,8 @@ def main(args):
     save_file = args.save_file
 
     # List of variables to subset
-    variables = ['XLAT', 'XLONG', 'temp', 'rh', 'z', 'pressure', 'ter', 'slp', 'cloudfrac', 'td', 'height_agl']
+    variables = ['XLAT', 'XLONG', 'temp', 'rh', 'z', 'pressure', 'ter', 'slp', 'cloudfrac', 'td', 'height_agl',
+                 'LANDMASK', 'LAKEMASK']
 
     # Output time units
     time_units = 'seconds since 1970-01-01 00:00:00'
@@ -155,6 +156,11 @@ def main(args):
     ds['height_agl'].attrs['comment'] = 'Model height above ground level'
     ds['height_agl'].attrs['axis'] = 'Z'
     ds['height_agl'].attrs['positive'] = 'up'
+
+    ds['LANDMASK'].attrs['standard_name'] = 'land_binary_mask'
+    ds['LANDMASK'].attrs['long_name'] = 'Land Mask'
+
+    ds['LAKEMASK'].attrs['long_name'] = 'Lake Mask'
 
     datetime_format = '%Y%m%dT%H%M%SZ'
     created = pd.Timestamp(pd.datetime.utcnow()).strftime(datetime_format)  # creation time Timestamp
