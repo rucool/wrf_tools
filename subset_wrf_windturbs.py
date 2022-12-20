@@ -70,9 +70,13 @@ def main(args):
 
         splitter = fname.split('/')[-1].split('_')
 
-        save_name = 'wrfproc_{}_{}_00Z_H{:03d}.nc'.format(domainstr,
-                                                          splitter[2].replace('-', ''),
-                                                          int(splitter[-1].split(':')[0]))
+        # rename the hour 24 file
+        if splitter[2].replace('-', '') == rdate:
+            save_name = 'wrfproc_{}_{}_00Z_H{:03d}.nc'.format(domainstr,
+                                                              splitter[2].replace('-', ''),
+                                                              int(splitter[-1].split(':')[0]))
+        else:
+            save_name = 'wrfproc_{}_{}_00Z_H024.nc'.format(domainstr, rdate)
 
         save_file = os.path.join(sdir, rtype, rdate, save_name)
 
