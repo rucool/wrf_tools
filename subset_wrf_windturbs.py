@@ -3,7 +3,8 @@
 """
 Author: Mike Smith
 Modified on 8/17/2020 by Lori Garzio
-Last modified 12/6/2022
+Last modified 1/11/2023
+Subset WRF output files for wind turbine analysis, assuming a run time of 24 hours (for file naming purposes)
 """
 
 import argparse
@@ -313,8 +314,8 @@ def main(args):
             ('acknowledgement', 'This data is provided by the Rutgers Center for Ocean Observing Leadership. Funding is provided by the New Jersey Board of Public Utilities).'),
             ('standard_name_vocabulary', 'CF Standard Name Table v41'),
             ('date_created', created),
-            ('creator_name', 'Joseph Brodie'),
-            ('creator_email', 'jbrodie@marine.rutgers.edu'),
+            ('creator_name', 'Michael Crowley'),
+            ('creator_email', 'crowley@marine.rutgers.edu'),
             ('creator_url', 'rucool.marine.rutgers.edu'),
             ('institution', 'Center for Ocean Observing and Leadership, Department of Marine & Coastal Sciences, Rutgers University'),
             ('project', 'New Jersey Board of Public Utilities - Offshore Wind Energy - RUWRF Model'),
@@ -329,8 +330,8 @@ def main(args):
             ('time_coverage_end', time_end),
             ('creator_type', 'person'),
             ('creator_institution', 'Rutgers University'),
-            ('contributor_name', 'Joseph Brodie'),
-            ('contributor_role', 'Director of Atmospheric Research'),
+            ('contributor_name', 'Travis Miles, Scott Glenn, Josh Kohut, Michael Crowley, Joseph Brodie, James Kim, Lori Garzio, Laura Nazzaro'),
+            ('contributor_role', 'Principal Investigator, Principal Investigator, Principal Investigator, RUCOOL Technical Director, Director of Atmospheric Research, Research Project Assistant, Research Analyst, Research Analyst'),
             ('geospatial_lat_units', 'degrees_north'),
             ('geospatial_lon_units', 'degrees_east'),
             ('date_modified', created),
