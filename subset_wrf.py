@@ -3,7 +3,7 @@
 """
 Author: Mike Smith
 Modified on 8/17/2020 by Lori Garzio
-Last modified 1/11/2023
+Last modified 1/26/2023
 """
 
 import argparse
@@ -254,8 +254,8 @@ def main(args):
         ('acknowledgement', 'This data is provided by the Rutgers Center for Ocean Observing Leadership. Funding is provided by the New Jersey Board of Public Utilities).'),
         ('standard_name_vocabulary', 'CF Standard Name Table v41'),
         ('date_created', created),
-        ('creator_name', 'Michael Crowley'),
-        ('creator_email', 'crowley@marine.rutgers.edu'),
+        ('creator_name', 'RUCOOL Offshore Wind Data Team'),
+        ('creator_email', 'offshorewind@marine.rutgers.edu'),
         ('creator_url', 'rucool.marine.rutgers.edu'),
         ('institution', 'Center for Ocean Observing and Leadership, Department of Marine & Coastal Sciences, Rutgers University'),
         ('project', 'New Jersey Board of Public Utilities - Offshore Wind Energy - RUWRF Model'),
@@ -268,7 +268,7 @@ def main(args):
         ('geospatial_vertical_positive', 'down'),
         ('time_coverage_start', time_start),
         ('time_coverage_end', time_end),
-        ('creator_type', 'person'),
+        ('creator_type', 'group'),
         ('creator_institution', 'Rutgers University'),
         ('contributor_name', 'Travis Miles, Scott Glenn, Josh Kohut, Michael Crowley, Joseph Brodie, James Kim, Lori Garzio, Laura Nazzaro'),
         ('contributor_role', 'Principal Investigator, Principal Investigator, Principal Investigator, RUCOOL Technical Director, Director of Atmospheric Research, Research Project Assistant, Research Analyst, Research Analyst'),
