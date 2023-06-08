@@ -3,7 +3,7 @@
 """
 Author: Mike Smith
 Modified on 8/17/2020 by Lori Garzio
-Last modified 1/26/2023
+Last modified 6/8/2023
 Subset WRF output files for wind turbine analysis, assuming a run time of 24 hours (for file naming purposes)
 """
 
@@ -358,10 +358,10 @@ if __name__ == '__main__':
 
     arg_parser.add_argument('-r',
                             dest='runtype',
-                            choices=['1km_ctrl', '1km_wf2km'],
+                            choices=['1km_ctrl', '1km_wf2km', '1km_wf2km_nyb'],
                             default='1km_ctrl',
                             type=str,
-                            help='Type of run, control or windfarm')
+                            help='Type of run: control, windfarm, or larger windfarm for the entire NYB')
 
     arg_parser.add_argument('-f',
                             dest='fdir',
