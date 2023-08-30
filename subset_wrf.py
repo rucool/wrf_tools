@@ -3,7 +3,7 @@
 """
 Author: Mike Smith
 Modified on 8/17/2020 by Lori Garzio
-Last modified 1/26/2023
+Last modified 8/30/2023
 """
 
 import argparse
@@ -74,6 +74,14 @@ def main(args):
     diagnostic_vars['U'] = xr.concat(utemp, dim='height')
     diagnostic_vars['V'] = xr.concat(vtemp, dim='height')
 
+    # Interpolate temperature, include 10m
+    heights.insert(0, 10)
+    interp_temp = interplevel(getvar(ncfile, 'temp'), new_z, heights, default_fill(np.float32))
+    interp_temp = cf.delete_attr(interp_temp)
+    interp_temp = interp_temp.rename({'level': 'height'})
+    del interp_temp.attrs['_FillValue']
+    diagnostic_vars['TEMP'] = xr.concat(interp_temp, dim='height')
+
     # Interpolate u and v components of wind to Boundary Layer Heights for wind gust calculation
     uvpblh = interplevel(uvm, new_z, primary_vars['PBLH'])
     uvpblh = cf.delete_attr(uvpblh).drop(['u_v'])  # drop unnecessary attributes
@@ -133,7 +141,7 @@ def main(args):
     ds['XLAT'].attrs['valid_min'] = np.float32(-90.0)
     ds['XLAT'].attrs['valid_max'] = np.float32(90.0)
 
-    # Set depth attributes
+    # Set height attributes
     ds['height'].attrs['long_name'] = 'Height Above Ground Level'
     ds['height'].attrs['standard_name'] = 'height'
     ds['height'].attrs['comment'] = 'Derived from subtracting terrain height from height above sea level'
@@ -149,6 +157,7 @@ def main(args):
     ds['U'].attrs['description'] = 'earth rotated u'
     ds['U'].attrs['valid_min'] = np.float32(-300)
     ds['U'].attrs['valid_max'] = np.float32(300)
+    ds['U'].attrs['comment'] = 'Interpolated to height from native model levels'
 
     # Set v attributes
     ds['V'].attrs['long_name'] = 'Northward Wind Component'
@@ -158,6 +167,7 @@ def main(args):
     ds['V'].attrs['description'] = 'earth rotated v'
     ds['V'].attrs['valid_min'] = np.float32(-300)
     ds['V'].attrs['valid_max'] = np.float32(300)
+    ds['V'].attrs['comment'] = 'Interpolated to height from native model levels'
 
     # Set u10 attributes
     ds['U10'].attrs['long_name'] = 'Eastward Wind Component - 10m'
@@ -176,6 +186,10 @@ def main(args):
     ds['V10'].attrs['description'] = '10m earth rotated v'
     ds['V10'].attrs['valid_min'] = np.float32(-300)
     ds['V10'].attrs['valid_max'] = np.float32(300)
+
+    # Set temperature attributes
+    ds['TEMP'].attrs['description'] = 'temperature'
+    ds['TEMP'].attrs['comment'] = 'Interpolated to height from native model levels'
 
     # set primary attributes
     ds['GLW'].attrs['standard_name'] = 'surface_downwelling_longwave_flux_in_air'
