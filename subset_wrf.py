@@ -78,14 +78,12 @@ def main(args):
     interp_temp10 = interplevel(getvar(ncfile, 'temp'), new_z, 10, default_fill(np.float32))
     interp_temp10 = cf.delete_attr(interp_temp10)
     interp_temp10 = interp_temp10.drop('level')  # drop the height coordinate
-    del interp_temp10.attrs['_FillValue']
     primary_vars['TEMP10'] = interp_temp10
 
     # Interpolate temperature to the same heights as U and V
     interp_temp = interplevel(getvar(ncfile, 'temp'), new_z, heights, default_fill(np.float32))
     interp_temp = cf.delete_attr(interp_temp)
     interp_temp = interp_temp.rename({'level': 'height'})
-    del interp_temp.attrs['_FillValue']
     diagnostic_vars['TEMP'] = xr.concat(interp_temp, dim='height')
 
     # Interpolate u and v components of wind to Boundary Layer Heights for wind gust calculation
@@ -109,6 +107,8 @@ def main(args):
     ds = xr.Dataset({**primary_vars, **diagnostic_vars})
     ds['U'] = ds.U.astype(np.float32)
     ds['V'] = ds.V.astype(np.float32)
+    ds['TEMP10'] = ds.TEMP10.astype(np.float32)
+    ds['TEMP'] = ds.TEMP.astype(np.float32)
     ds['height'] = ds.height.astype(np.int32)
 
     try:
@@ -194,12 +194,14 @@ def main(args):
     ds['V10'].attrs['valid_max'] = np.float32(300)
 
     # Set temperature at 10m attributes
+    ds['TEMP10'].attrs['units'] = 'K'
     ds['TEMP10'].attrs['description'] = 'temperature'
     ds['TEMP10'].attrs['long_name'] = 'Air Temperature at 10m'
     ds['TEMP10'].attrs['standard_name'] = 'air_temperature'
     ds['TEMP10'].attrs['comment'] = 'Interpolated to a height of 10m from native model levels'
 
     # Set temperature attributes
+    ds['TEMP'].attrs['units'] = 'K'
     ds['TEMP'].attrs['description'] = 'temperature'
     ds['TEMP'].attrs['long_name'] = 'Air Temperature'
     ds['TEMP'].attrs['standard_name'] = 'air_temperature'
