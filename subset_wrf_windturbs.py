@@ -3,7 +3,7 @@
 """
 Author: Mike Smith
 Modified on 8/17/2020 by Lori Garzio
-Last modified 6/8/2023
+Last modified 11/9/2023
 Subset WRF output files for wind turbine analysis, assuming a run time of 24 hours (for file naming purposes)
 """
 
@@ -25,6 +25,7 @@ def main(args):
     sdir = args.sdir
     rtype = args.runtype
     dm = args.domain
+    flux_vars = args.flux_vars
 
     if dm == 'd03':
         domainstr = '1km'
@@ -58,6 +59,14 @@ def main(args):
             computed=['rh2', 'slp', 'mdbz'],
             interp_vars=['temp']
         )
+
+        if flux_vars:
+            pvars = ['SSTSK', 'Q2', 'TH2', 'HGT', 'HFX', 'QFX', 'LH']
+            ivars = ['CLDFRA', 'QVAPOR', 'eth', 'omega', 'p', 'rh', 'td', 'theta', 'tv']
+            for pv in pvars:
+                variables['primary'].append(pv)
+            for iv in ivars:
+                variables['interp_vars'].append(iv)
 
         # Generate height table for interpolation of U and V components
         gen_heights = [20, 320, 20]  # minimum height, maximum height, distance between heights
@@ -93,7 +102,7 @@ def main(args):
         # Calculate u and v components of wind rotated to Earth coordinates
         uvm = getvar(ncfile, 'uvmet')
 
-        # interpolate u and v components of wind to 0-200m by 10m
+        # interpolate u and v components of wind
         uvtemp = interplevel(uvm, new_z, heights, default_fill(np.float32))
         uvtemp = uvtemp.rename({'level': 'height'})
         utemp, vtemp = cf.split_uvm(uvtemp)
@@ -358,7 +367,7 @@ if __name__ == '__main__':
 
     arg_parser.add_argument('-r',
                             dest='runtype',
-                            choices=['1km_ctrl', '1km_wf2km', '1km_wf2km_nyb'],
+                            choices=['1km_ctrl', '1km_wf2km', '1km_wf2km_nyb', '1km_wf2km_nyb_modsst'],
                             default='1km_ctrl',
                             type=str,
                             help='Type of run: control, windfarm, or larger windfarm for the entire NYB')
@@ -381,6 +390,14 @@ if __name__ == '__main__':
                             default='d03',
                             type=str,
                             help='Domain code, d01=9km, d02=3km, d03=1km')
+
+    arg_parser.add_argument('-add_flux',
+                            dest='flux_vars',
+                            choices=[True, False],
+                            default=True,
+                            type=bool,
+                            help='Include additional variables in the dataset regarding fluxes and for additional '
+                                 'science analyses')
 
     parsed_args = arg_parser.parse_args()
     sys.exit(main(parsed_args))
