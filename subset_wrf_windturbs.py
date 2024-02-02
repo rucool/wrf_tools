@@ -3,8 +3,8 @@
 """
 Author: Mike Smith
 Modified on 8/17/2020 by Lori Garzio
-Last modified 11/9/2023
-Subset WRF output files for wind turbine analysis, assuming a run time of 24 hours (for file naming purposes)
+Last modified 2/1/2024
+Subset WRF output files for wind turbine analysis
 """
 
 import argparse
@@ -38,17 +38,9 @@ def main(args):
 
     files = sorted(glob.glob(os.path.join(fdir, rtype, rdate) + f'/wrfout_{dm}*'))
 
-    for fname in files:
-
-        splitter = fname.split('/')[-1].split('_')
-
-        # rename the hour 24 file
-        if splitter[2].replace('-', '') == rdate:
-            save_name = 'wrfproc_{}_{}_00Z_H{:03d}.nc'.format(domainstr,
-                                                              splitter[2].replace('-', ''),
-                                                              int(splitter[-1].split(':')[0]))
-        else:
-            save_name = 'wrfproc_{}_{}_00Z_H024.nc'.format(domainstr, rdate)
+    for fidx, fname in enumerate(files):
+        forecast_hour = '{:03d}'.format(fidx)
+        save_name = f'wrfproc_{domainstr}_{rdate}_00Z_H{forecast_hour}.nc'
 
         save_file = os.path.join(sdir, rtype, rdate, save_name)
 
